@@ -11,7 +11,7 @@ export const envSchema = z.object({
     MAIL_PASS: z.string(),
     FRONTEND_URL: z.string(),
     ASAAS_API_KEY: z.string(),
-    ASAAS_BASE_URL: z.string().url(),
+    ASAAS_BASE_URL: z.string(),
     ASAAS_WEBHOOK_TOKEN: z.string().optional(),
 });
 
