@@ -26,6 +26,66 @@ model User {
     deletedAt DateTime?
 }
 
+model Package {
+    id           String      @id @default(uuid())
+    name         String
+    type         PackageType
+    processLimit Int?
+    price        BigInt
+    order        Int
+    isMain       Boolean     @default(false)
+    isActive     Boolean     @default(true)
+    createdAt    DateTime    @default(now())
+    deletedAt    DateTime?
+
+    subscriptions Subscription[]
+
+    @@map("packages")
+}
+
+model Subscription {
+    id                        String                 @id @default(uuid())
+    billingType               BillingType
+    cycle                     CycleType              @default(MONTHLY)
+    status                    SubscriptionStatusType @default(ACTIVE)
+    externalRefSubscriptionId String?
+    nextDueDate               DateTime?
+    endDate                   DateTime?
+    last4CardDigits           String?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+    packageId String
+
+    Payments Payment[]
+
+    @@map("subscriptions")
+}
+
+model Payment {
+    id                   String            @id @default(uuid())
+    price                BigInt
+    billingType          BillingType
+    status               PaymentStatusType @default(PENDING)
+    externalRefPaymentId String
+    last4CardDigits      String?
+    invoiceUrl           String?
+    paidAt               DateTime?
+    paymentGateway       String?           @default("ASAAS")
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+    subscriptionId String
+
+    @@map("payments")
+}
+
 enum RoleType {
     SUPER_ADMIN
     ADMIN
@@ -37,4 +97,35 @@ enum UserStatusType {
     PENDING
     DISABLED
     ACTIVE
+}
+
+enum SubscriptionStatusType {
+    ACTIVE
+    DISABLED
+    CANCELLED
+    PENDING
+}
+
+enum BillingType {
+    CREDIT_CARD
+    BOLETO
+    PIX
+}
+
+enum PaymentStatusType {
+    PAID
+    PENDING
+    REFUNDED
+}
+
+enum CycleType {
+    MONTHLY
+    SEMIANNUALLY
+    YEARLY
+}
+
+enum PackageType {
+    BRONZE
+    SILVER
+    GOLD
 }
