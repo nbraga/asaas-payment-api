@@ -25,9 +25,11 @@ export interface CreateSubscriptionPaymentParams {
 
 export type CreateSubscriptionPaymentErrors =
     | "Pacote não encontrado"
-    | "Usuário não encontrado";
+    | "Usuário não encontrado"
+    | "Erro ao criar pagamento"
+    | "Empresa já possui uma assinatura ativa";
 
-export type CreateSubscriptionPaymentResponse = null;
+export type CreateSubscriptionPaymentResponse = any;
 
 export type CreateSubscriptionPaymentUseCase = ServiceResponseProps<
     CreateSubscriptionPaymentParams,

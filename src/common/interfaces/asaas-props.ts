@@ -29,6 +29,7 @@ export interface AsaasCustomer {
     postalCode?: string;
     externalReference?: string;
     notificationDisabled?: boolean;
+    company?: string;
 }
 
 export interface AsaasPayment {
@@ -79,6 +80,7 @@ export interface AsaasPaymentResponse {
     originalDueDate: string;
     confirmedDate?: string;
     paymentDate?: string;
+    nextDueDate?: string;
 }
 
 export interface AsaasWebhookEvent {
@@ -86,35 +88,18 @@ export interface AsaasWebhookEvent {
     payment: AsaasPaymentResponse;
 }
 
-export type SubscriptionCycle =
-    | "WEEKLY"
-    | "BIWEEKLY"
-    | "MONTHLY"
-    | "QUARTERLY"
-    | "SEMIANNUALLY"
-    | "YEARLY";
+export type SubscriptionCycle = "MONTHLY" | "SEMIANNUALLY" | "YEARLY";
 
 export type SubscriptionStatus = "ACTIVE" | "EXPIRED" | "OVERDUE" | "INACTIVE";
 
 export interface AsaasSubscription {
-    customer: string; // ID do cliente
+    customer: string;
     billingType: BillingType;
     value: number;
     nextDueDate: string; // formato: YYYY-MM-DD
     cycle: SubscriptionCycle;
     description?: string;
     externalReference?: string;
-    discount?: {
-        value?: number;
-        dueDateLimitDays?: number;
-        type?: "FIXED" | "PERCENTAGE";
-    };
-    interest?: {
-        value: number;
-    };
-    fine?: {
-        value: number;
-    };
     endDate?: string; // formato: YYYY-MM-DD
     maxPayments?: number;
 }
@@ -130,6 +115,34 @@ export interface AsaasSubscriptionResponse {
     status: SubscriptionStatus;
     externalReference: string;
     dateCreated: string;
-    endDate?: string;
+    endDate: string;
     maxPayments?: number;
+    invoiceUrl?: string;
+}
+
+export interface CreateCreditCardPaymentRepositoryParams {
+    customer: string;
+    value: number;
+    nextDueDate: string;
+    cycle: SubscriptionCycle;
+    endDate: string;
+    description: string;
+    remoteIp: string;
+    externalReference?: string;
+    creditCard: {
+        holderName: string;
+        number: string;
+        expiryMonth: string;
+        expiryYear: string;
+        ccv: string;
+    };
+    creditCardHolderInfo: {
+        name: string;
+        email: string;
+        cpfCnpj: string;
+        postalCode: string;
+        addressNumber: string;
+        addressComplement?: string;
+        phone: string;
+    };
 }

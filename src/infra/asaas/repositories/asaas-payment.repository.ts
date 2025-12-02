@@ -4,11 +4,19 @@ import type {
     AsaasPaymentResponse,
     AsaasSubscription,
     AsaasSubscriptionResponse,
+    CreateCreditCardPaymentRepositoryParams,
 } from "@/common/interfaces/asaas-props";
 import { EnvService } from "@/infra/env/env.service";
 import { Injectable, Logger } from "@nestjs/common";
 import axios, { type AxiosInstance } from "axios";
-import { PaymentRepository } from "./interfaces/payment.repository";
+import { BillingType } from "../../../../generated/prisma";
+import {
+    ParamsUpdateCreditCardSubscriptionRepository,
+    ParamsUpdateSubscriptionRepository,
+    PaymentRepository,
+    PaymentRepositoryParams,
+    PaymentRepositoryResponse,
+} from "./interfaces/payment.repository";
 
 @Injectable()
 export class AsaasPaymentRepository extends PaymentRepository {
@@ -25,11 +33,11 @@ export class AsaasPaymentRepository extends PaymentRepository {
             baseURL,
             headers: {
                 "Content-Type": "application/json",
+                "User-Agent": "Clics/1.0.0 (Node.js; development)",
                 access_token: apiKey,
             },
         });
 
-        // Interceptor para log de requisições
         this.httpClient.interceptors.request.use((config) => {
             this.logger.log(
                 `Request: ${config.method?.toUpperCase()} ${config.url}`,
@@ -37,7 +45,6 @@ export class AsaasPaymentRepository extends PaymentRepository {
             return config;
         });
 
-        // Interceptor para log de respostas
         this.httpClient.interceptors.response.use(
             (response) => {
                 this.logger.log(
@@ -47,7 +54,7 @@ export class AsaasPaymentRepository extends PaymentRepository {
             },
             (error) => {
                 this.logger.error(
-                    `Error: ${error.response?.status} ${error.config?.url}`,
+                    // `Error: ${error.response?.status} ${error.config?.url}`,
                     error.response?.data,
                 );
                 throw error;
@@ -106,12 +113,7 @@ export class AsaasPaymentRepository extends PaymentRepository {
         return data;
     }
 
-    async listPayments(params?: {
-        customer?: string;
-        status?: string;
-        offset?: number;
-        limit?: number;
-    }): Promise<{
+    async listPayments(params?: PaymentRepositoryParams): Promise<{
         data: AsaasPaymentResponse[];
         totalCount: number;
     }> {
@@ -169,6 +171,128 @@ export class AsaasPaymentRepository extends PaymentRepository {
     }
 
     async deleteSubscription(subscriptionId: string): Promise<void> {
-        await this.httpClient.delete(`/subscriptions/${subscriptionId}`);
+        try {
+            await this.httpClient.delete(`/subscriptions/${subscriptionId}`);
+        } catch (error) {
+            this.logger.error(
+                `Failed to delete subscription ${subscriptionId}: ${error}`,
+            );
+            throw error;
+        }
+    }
+
+    async createCreditCardPayment(
+        params: CreateCreditCardPaymentRepositoryParams,
+    ): Promise<AsaasPaymentResponse> {
+        const { data } = await this.httpClient.post("/subscriptions", {
+            customer: params.customer,
+            billingType: "CREDIT_CARD",
+            value: params.value,
+            nextDueDate: params.nextDueDate,
+            cycle: params.cycle,
+            description: params.description,
+            creditCard: params.creditCard,
+            creditCardHolderInfo: params.creditCardHolderInfo,
+            remoteIp: params.remoteIp,
+            externalReference: params.externalReference,
+        });
+
+        return data;
+    }
+
+    async payWithCreditCard(
+        paymentId: string,
+        creditCardData: {
+            creditCard: {
+                holderName: string;
+                number: string;
+                expiryMonth: string;
+                expiryYear: string;
+                ccv: string;
+            };
+            creditCardHolderInfo: {
+                name: string;
+                email: string;
+                cpfCnpj: string;
+                postalCode: string;
+                addressNumber: string;
+                addressComplement?: string;
+                phone: string;
+            };
+            remoteIp?: string;
+        },
+    ): Promise<AsaasPaymentResponse> {
+        const { data } = await this.httpClient.post<AsaasPaymentResponse>(
+            `/payments/${paymentId}/payWithCreditCard`,
+            creditCardData,
+        );
+        return data;
+    }
+
+    async getInfoPayment(
+        paymentId: string,
+    ): Promise<PaymentRepositoryResponse> {
+        const { data } = await this.httpClient.get(
+            `/payments/${paymentId}/billingInfo`,
+        );
+
+        return data;
+    }
+
+    async updateSubscription(
+        data: ParamsUpdateSubscriptionRepository,
+    ): Promise<void> {
+        try {
+            await this.httpClient.put<AsaasPaymentResponse>(
+                `/subscriptions/${data.id}`,
+                data,
+            );
+        } catch (error) {
+            const errorMessage =
+                error?.response?.data?.errors?.[0]?.description ||
+                "Erro ao processar pagamento";
+
+            throw new Error(errorMessage);
+        }
+    }
+
+    async updateCreditCardSubscription(
+        params: ParamsUpdateCreditCardSubscriptionRepository,
+    ): Promise<AsaasPaymentResponse> {
+        try {
+            const { data } = await this.httpClient.put<AsaasPaymentResponse>(
+                `/subscriptions/${params.id}/creditCard`,
+                params,
+            );
+            return data;
+        } catch (error) {
+            const errorMessage =
+                error?.response?.data?.errors?.[0]?.description ||
+                "Erro ao processar pagamento";
+
+            throw new Error(errorMessage);
+        }
+    }
+
+    async updateBillingTypeSubscription({
+        subscriptionId,
+        billingType,
+    }: {
+        subscriptionId: string;
+        billingType: BillingType;
+    }): Promise<AsaasPaymentResponse> {
+        try {
+            const { data } = await this.httpClient.put<AsaasPaymentResponse>(
+                `/subscriptions/${subscriptionId}`,
+                { billingType },
+            );
+            return data;
+        } catch (error) {
+            const errorMessage =
+                error?.response?.data?.errors?.[0]?.description ||
+                "Erro ao processar pagamento";
+
+            throw new Error(errorMessage);
+        }
     }
 }
