@@ -22,6 +22,8 @@ export class PrismaUserRepository extends UserRepository {
                     password: params.user.password,
                     fullName: params.user.fullName,
                     phone: params.user.phone,
+                    cnpj: params.user.cnpj,
+                    role: params.user.role,
                 },
             });
 

@@ -12,6 +12,11 @@ export const createUserSchema = z.object({
         .min(11, "Telefone deve ter pelo menos 11 caracteres")
         .max(15, "Telefone deve ter 15 caracteres")
         .transform((val) => val.replace(/\D/g, "")),
+    cnpj: z
+        .string()
+        .min(14, "CNPJ deve ter 14 caracteres")
+        .max(18, "CNPJ deve ter no máximo 18 caracteres"),
+    role: z.enum(["ADMIN", "CLIENT"]).default("CLIENT"),
 });
 
 export type CreateUserDto = z.infer<typeof createUserSchema>;

@@ -13,6 +13,9 @@ export const envSchema = z.object({
     ASAAS_API_KEY: z.string(),
     ASAAS_BASE_URL: z.string(),
     ASAAS_WEBHOOK_TOKEN: z.string().optional(),
+    SUPER_ADMIN_EMAIL: z.string().email(),
+    SUPER_ADMIN_PASSWORD: z.string().min(8),
+    SUPER_ADMIN_CNPJ: z.string().length(14),
 });
 
 export type Env = z.infer<typeof envSchema>;

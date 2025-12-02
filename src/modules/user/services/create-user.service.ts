@@ -48,7 +48,14 @@ export class CreateUserService implements CreateUserUseCase {
         body = userData;
 
         const user = await this.userRepository.create({
-            user: body,
+            user: {
+                cnpj: body.cnpj,
+                email: body.email,
+                fullName: body.fullName,
+                phone: body.phone,
+                password: body.password,
+                role: body.role,
+            },
         });
 
         const confirmationEmailToken = await this.jwtService.signAsync(

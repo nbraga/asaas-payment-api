@@ -6,6 +6,8 @@ export interface CreateUserParams {
         password: string;
         fullName: string;
         phone: string;
+        cnpj: string;
+        role: "ADMIN" | "CLIENT";
     };
 }
 
