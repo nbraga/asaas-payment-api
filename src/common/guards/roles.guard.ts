@@ -23,21 +23,19 @@ export class RolesGuard implements CanActivate {
 
         const request = context
             .switchToHttp()
-            .getRequest<{ user?: { roles?: string[] } }>();
+            .getRequest<{ user?: { role: UserRoles } }>();
         const user = request?.user;
 
-        if (!user || !Array.isArray(user.roles)) {
+        if (!user) {
             return false;
         }
 
         // SUPER_ADMIN has access to everything
-        if (user.roles.includes("SUPER_ADMIN")) {
+        if (user.role === "SUPER_ADMIN") {
             return true;
         }
 
-        const hasRole = user.roles.some((role: UserRoles) =>
-            requiredRoles.includes(role),
-        );
+        const hasRole = requiredRoles.includes(user.role);
 
         if (!hasRole) {
             throw new UnauthorizedException("Usuário não autorizado");

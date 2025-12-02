@@ -1,5 +1,4 @@
 import { Roles } from "@/common/decorators/roles.decorator";
-import { AuthGuard } from "@/common/guards/auth.guard";
 import { RolesGuard } from "@/common/guards/roles.guard";
 import {
     Controller,
@@ -25,7 +24,7 @@ import { SoftDeletePackageService } from "../services/soft-delete-package.servic
 
 @ApiTags("Pacotes")
 @Controller("package")
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(RolesGuard)
 @Roles("SUPER_ADMIN")
 export class SoftDeletePackageController {
     constructor(

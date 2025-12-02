@@ -1,5 +1,4 @@
 import { Roles } from "@/common/decorators/roles.decorator";
-import { AuthGuard } from "@/common/guards/auth.guard";
 import { RolesGuard } from "@/common/guards/roles.guard";
 import {
     Controller,
@@ -24,7 +23,7 @@ import { ToggleActivePackageService } from "../services/toggle-active-package.se
 
 @ApiTags("Pacotes")
 @Controller("package")
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(RolesGuard)
 @Roles("SUPER_ADMIN")
 export class ToggleActivePackageController {
     constructor(

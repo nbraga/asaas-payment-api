@@ -1,5 +1,4 @@
 import { Roles } from "@/common/decorators/roles.decorator";
-import { AuthGuard } from "@/common/guards/auth.guard";
 import { RolesGuard } from "@/common/guards/roles.guard";
 import {
     ConflictException,
@@ -25,7 +24,7 @@ import { FindOnePackageService } from "../services/find-one-package.service";
 
 @ApiTags("Pacotes")
 @Controller("package")
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(RolesGuard)
 @Roles("SUPER_ADMIN", "ADMIN")
 export class FindOnePackageController {
     constructor(

@@ -7,7 +7,6 @@ export interface ParamsCreatePackageRepositoryProps {
     processLimit?: number | null;
     price: bigint;
     isMain: boolean;
-    features: { description: string }[];
 }
 
 export interface ResponseFindManyPackagesRepository {

@@ -9,6 +9,7 @@ import { PrismaService } from "@/infra/prisma/prisma.service";
 import { AppController } from "@/modules/app.controller";
 import { AppService } from "@/modules/app.service";
 import { AuthModule } from "@/modules/auth/auth.module";
+import { PackageModule } from "@/modules/package/package.module";
 import { PaymentModule } from "@/modules/payment/payment.module";
 import { UserModule } from "@/modules/user/user.module";
 import {
@@ -31,6 +32,7 @@ import { APP_FILTER, APP_GUARD } from "@nestjs/core";
         AuthModule,
         UserModule,
         PaymentModule,
+        PackageModule,
     ],
     controllers: [AppController],
     providers: [

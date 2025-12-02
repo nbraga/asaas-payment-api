@@ -1,5 +1,4 @@
 import { Roles } from "@/common/decorators/roles.decorator";
-import { AuthGuard } from "@/common/guards/auth.guard";
 import { RolesGuard } from "@/common/guards/roles.guard";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation.pipe";
 import {
@@ -31,7 +30,7 @@ import { CreatePackageService } from "../services/create-package.service";
 
 @ApiTags("Pacotes")
 @Controller("package")
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(RolesGuard)
 @Roles("SUPER_ADMIN")
 export class CreatePackageController {
     constructor(private readonly createPackageService: CreatePackageService) {}
@@ -86,13 +85,11 @@ export class CreatePackageController {
 
         switch (result.error) {
             case "Já existe um pacote principal cadastrado":
-                throw new ConflictException({
-                    message: result.error,
-                });
             case "Número máximo de pacotes ativos atingido":
                 throw new ConflictException({
                     message: result.error,
                 });
+
             default:
                 throw new InternalServerErrorException({
                     message: "Erro interno do servidor",

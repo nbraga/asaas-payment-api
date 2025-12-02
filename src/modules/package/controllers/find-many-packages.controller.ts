@@ -1,5 +1,3 @@
-import { AuthGuard } from "@/common/guards/auth.guard";
-import { RolesGuard } from "@/common/guards/roles.guard";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation.pipe";
 import {
     BadRequestException,
@@ -9,7 +7,6 @@ import {
     HttpStatus,
     InternalServerErrorException,
     Query,
-    UseGuards,
 } from "@nestjs/common";
 import {
     ApiBearerAuth,
@@ -28,8 +25,7 @@ import {
 import { FindManyPackagesService } from "../services/find-many-packages.service";
 
 @ApiTags("Pacotes")
-@Controller("package")
-@UseGuards(AuthGuard, RolesGuard)
+@Controller("packages")
 export class FindManyPackagesController {
     constructor(
         private readonly findManyPackagesService: FindManyPackagesService,
