@@ -1,45 +1,15 @@
 import { z } from "zod";
 
 export const createSubscriptionSchema = z.object({
-    customerId: z
-        .string()
-        .optional()
-        .describe("ID do cliente existente (opcional)"),
-    customerName: z.string().min(1).optional().describe("Nome do cliente"),
-    customerCpfCnpj: z.string().min(11).max(14).optional().describe("CPF/CNPJ"),
-    customerEmail: z.string().email().optional().describe("Email do cliente"),
-    customerPhone: z.string().optional().describe("Telefone do cliente"),
+    packageId: z.string().uuid({
+        message: "packageId deve ser um UUID válido",
+    }),
     billingType: z
-        .enum(["BOLETO", "CREDIT_CARD", "PIX", "UNDEFINED"])
+        .enum(["BOLETO", "CREDIT_CARD", "PIX"])
         .describe("Tipo de cobrança"),
-    value: z.number().positive().describe("Valor da assinatura"),
-    nextDueDate: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .describe("Data do primeiro vencimento (YYYY-MM-DD)"),
     cycle: z
-        .enum([
-            "WEEKLY",
-            "BIWEEKLY",
-            "MONTHLY",
-            "QUARTERLY",
-            "SEMIANNUALLY",
-            "YEARLY",
-        ])
+        .enum(["MONTHLY", "SEMIANNUALLY", "YEARLY"])
         .describe("Ciclo de cobrança"),
-    description: z.string().optional().describe("Descrição da assinatura"),
-    externalReference: z.string().optional().describe("Referência externa"),
-    endDate: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .optional()
-        .describe("Data de término (YYYY-MM-DD)"),
-    maxPayments: z
-        .number()
-        .int()
-        .positive()
-        .optional()
-        .describe("Número máximo de cobranças"),
 });
 
 export type CreateSubscriptionDto = z.infer<typeof createSubscriptionSchema>;

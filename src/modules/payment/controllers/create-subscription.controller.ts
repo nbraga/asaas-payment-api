@@ -1,4 +1,6 @@
 import { AuthGuard } from "@/common/guards/auth.guard";
+import type { UserPayloadProps } from "@/common/interfaces/user-payload-props";
+import { UserPayloadParam } from "@/common/param/user-payload.param";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation.pipe";
 import {
     createSubscriptionSchema,
@@ -7,10 +9,12 @@ import {
 } from "@/modules/payment/dto/create-subscription.dto";
 import { CreateSubscriptionService } from "@/modules/payment/services/create-subscription.service";
 import {
+    BadRequestException,
     Body,
     Controller,
     HttpCode,
     HttpStatus,
+    InternalServerErrorException,
     Post,
     UseGuards,
 } from "@nestjs/common";
@@ -67,9 +71,33 @@ export class CreateSubscriptionController {
         description: "Dados inválidos",
     })
     async handle(
+        @UserPayloadParam() user: UserPayloadProps,
         @Body(new ZodValidationPipe(createSubscriptionSchema))
         body: CreateSubscriptionDto,
     ) {
-        return this.createSubscriptionService.execute(body);
+        const response = await this.createSubscriptionService.execute({
+            billingType: body.billingType,
+            cycle: body.cycle,
+            packageId: body.packageId,
+            remoteIp: "123456",
+            userId: user.id,
+        });
+
+        if (response.status === "success") {
+            return response.data;
+        }
+
+        switch (response.error) {
+            case "Pacote não encontrado":
+            case "Usuário não encontrado":
+            case "Empresa já possui uma assinatura ativa":
+                throw new BadRequestException({
+                    message: response.error,
+                });
+            default:
+                throw new InternalServerErrorException({
+                    message: "Ocorreu um erro interno no servidor",
+                });
+        }
     }
 }
