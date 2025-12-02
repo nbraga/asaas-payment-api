@@ -29,14 +29,14 @@ import {
 
 @ApiTags("Assinaturas")
 @ApiBearerAuth()
-@Controller("subscriptions")
+@Controller("payment")
 @UseGuards(AuthGuard)
 export class CreateSubscriptionController {
     constructor(
         private readonly createSubscriptionService: CreateSubscriptionService,
     ) {}
 
-    @Post()
+    @Post("subscription")
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({
         summary: "Criar nova assinatura",
@@ -76,11 +76,8 @@ export class CreateSubscriptionController {
         body: CreateSubscriptionDto,
     ) {
         const response = await this.createSubscriptionService.execute({
-            billingType: body.billingType,
-            cycle: body.cycle,
-            packageId: body.packageId,
-            remoteIp: "123456",
             userId: user.id,
+            paymentData: { ...body, remoteIp: "123.456.789.000" },
         });
 
         if (response.status === "success") {
@@ -90,7 +87,6 @@ export class CreateSubscriptionController {
         switch (response.error) {
             case "Pacote não encontrado":
             case "Usuário não encontrado":
-            case "Empresa já possui uma assinatura ativa":
                 throw new BadRequestException({
                     message: response.error,
                 });
